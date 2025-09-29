@@ -7,13 +7,13 @@ cat("Installing packages for parallel flood-data-plotter client...\n\n")
 
 # Required packages for parallel processing
 required_packages <- c(
-  "httr2",      # Modern HTTP client
-  "jsonlite",   # JSON handling
-  "fs",         # File system operations
-  "future",     # Asynchronous parallel processing
-  "furrr",      # Future-based apply functions
-  "purrr",      # Functional programming tools
-  "tibble"      # Modern data frames
+  "httr2",
+  "jsonlite",
+  "fs",
+  "future",
+  "furrr",
+  "purrr",
+  "tibble"
 )
 
 # Optional packages
@@ -38,7 +38,7 @@ cat("\nInstalling optional packages...\n")
 for (pkg in optional_packages) {
   tryCatch({
     if (!requireNamespace(pkg, quietly = TRUE)) {
-      cat("📥 Installing:", pkg, "\n")
+      cat("Installing:", pkg, "\n")
       install.packages(pkg, repos = "https://cran.r-project.org")
     } else {
       cat("✅ Already installed:", pkg, "\n")
@@ -49,20 +49,20 @@ for (pkg in optional_packages) {
 }
 
 # Test parallel processing setup
-cat("\n🧪 Testing parallel processing setup...\n")
+cat("\nTesting parallel processing setup...\n")
 tryCatch({
   library(future)
   library(furrr)
-  
+
   # Test basic parallel functionality
   plan(multisession, workers = 2)
   test_result <- future_map(1:3, ~ Sys.getpid())
   plan(sequential)
-  
+
   unique_pids <- length(unique(unlist(test_result)))
   cat("✅ Parallel processing test successful!\n")
   cat("   - Used", unique_pids, "different processes\n")
-  
+
 }, error = function(e) {
   cat("❌ Parallel processing test failed:", e$message, "\n")
 })

@@ -29,15 +29,15 @@ api_info <- make_api_info(
 
 # ---- Working dir / script path ----
 script_path <- get_script_path()
-setwd(script_path)
+setwd(normalizePath(file.path(script_path, "server"), mustWork = FALSE))
 
 # ---- Log cleanup ----
 cleanup_old_logs <- function(log_dir = "logs", days_to_keep = 30) {
   if (!dir.exists(log_dir)) return()
-  
+
   cutoff_date <- Sys.Date() - days_to_keep
   log_files <- list.files(log_dir, pattern = "\\.(log|log\\.[0-9]+)$", full.names = TRUE)
-  
+
   for (file in log_files) {
     file_info <- file.info(file)
     if (!is.na(file_info$mtime) && as.Date(file_info$mtime) < cutoff_date) {
@@ -51,7 +51,7 @@ cleanup_old_logs <- function(log_dir = "logs", days_to_keep = 30) {
 cleanup_old_logs()
 
 # ---- Schemas ----
-SCHEMAS_DIR <- normalizePath(file.path(script_path, "api", "schemas"), mustWork = FALSE)
+SCHEMAS_DIR <- normalizePath(file.path(script_path, "server", "api", "schemas"), mustWork = FALSE)
 SCHEMA_VALIDATORS <- new.env(parent = emptyenv())
 load_schema_validators(SCHEMAS_DIR, SCHEMA_VALIDATORS)
 
@@ -87,15 +87,15 @@ if (identical(tolower(Sys.getenv("LOG_HTTP", "true")), "true")) {
       digits = NA,
       pretty = pretty
     )
-    
+
     # Output to console (for docker logs)
     cat(as.character(txt), "\n")
-    
+
     # Also log to file (if logs directory exists)
     log_dir <- "logs"
     if (dir.exists(log_dir)) {
       log_file <- file.path(log_dir, paste0("http-", Sys.Date(), ".log"))
-      
+
       # Check file size and rotate if needed (limit: 10MB)
       if (file.exists(log_file)) {
         file_size <- file.size(log_file)
@@ -111,7 +111,7 @@ if (identical(tolower(Sys.getenv("LOG_HTTP", "true")), "true")) {
           file.rename(log_file, paste0(log_file, ".1"))
         }
       }
-      
+
       cat(as.character(txt), "\n", file = log_file, append = TRUE)
     }
   }

@@ -8,3 +8,5 @@ data/
 renv/library/
 renv/staging/
 logs/
+server/renv/activate.R
+server/r_server.Rproj

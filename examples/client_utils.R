@@ -146,9 +146,15 @@ load_json_data <- function(json_file_path) {
   }
   
   tryCatch({
-    jsonlite::fromJSON(json_file_path, simplifyVector = FALSE)
+    json_body <- jsonlite::fromJSON(json_file_path, simplifyVector = FALSE)
+    
+    if (!is.null(json_body$json) && json_body$json == TRUE) {
+      stop("Please check input parameters for the `json` argument, this example client only returns html")
+    }
+    
+    return(json_body)
   }, error = function(e) {
-    stop("Failed to parse JSON file '", json_file_path, "': ", e$message)
+    stop(sprintf("'%s': %s",e$message, json_file_path))
   })
 }
 
