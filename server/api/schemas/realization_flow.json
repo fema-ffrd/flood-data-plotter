@@ -1,0 +1,225 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "realization_flows",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "shortname",
+        "ras_element",
+        "hms_element",
+        "usgs_id",
+        "duration",
+        "interval",
+        "ras_conf_limits",
+        "hms_conf_limits",
+        "ras_flows",
+        "hms_flows",
+        "ressim_flows",
+        "obs_flows",
+        "obs_conf_limits"
+    ],
+    "properties": {
+        "shortname": {
+            "type": "string"
+        },
+        "ras_element": {
+            "type": "string"
+        },
+        "hms_element": {
+            "type": "string"
+        },
+        "usgs_id": {
+            "type": "string"
+        },
+        "duration": {
+            "type": "integer"
+        },
+        "interval": {
+            "type": "string"
+        },
+        "json": { 
+            "type": "boolean" 
+        },
+        "ras_conf_limits": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "type": "object",
+                "required": [
+                    "Z",
+                    "median",
+                    "p95",
+                    "p05",
+                    "mean"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "Z": {
+                        "type": "number"
+                    },
+                    "median": {
+                        "type": "number"
+                    },
+                    "p95": {
+                        "type": "number"
+                    },
+                    "p05": {
+                        "type": "number"
+                    },
+                    "mean": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "hms_conf_limits": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "$ref": "#/properties/ras_conf_limits/items"
+            }
+        },
+        "ras_flows": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "type": "object",
+                "required": [
+                    "realization",
+                    "flows"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "realization": {
+                        "type": "integer"
+                    },
+                    "flows": {
+                        "type": "array",
+                        "maxItems": 3,
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "Block",
+                                "Event",
+                                "value",
+                                "AEP",
+                                "Z",
+                                "RP"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "Block": {
+                                    "type": "integer"
+                                },
+                                "Event": {
+                                    "type": "integer"
+                                },
+                                "value": {
+                                    "type": "number"
+                                },
+                                "AEP": {
+                                    "type": "number"
+                                },
+                                "Z": {
+                                    "type": "number"
+                                },
+                                "RP": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "hms_flows": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "$ref": "#/properties/ras_flows/items"
+            }
+        },
+        "ressim_flows": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "$ref": "#/properties/ras_flows/items"
+            }
+        },
+        "obs_flows": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "type": "object",
+                "required": [
+                    "Date",
+                    "Flow",
+                    "AEP",
+                    "Z",
+                    "RP"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "Date": {
+                        "type": "string"
+                    },
+                    "Flow": {
+                        "type": "number"
+                    },
+                    "AEP": {
+                        "type": "number"
+                    },
+                    "Z": {
+                        "type": "number"
+                    },
+                    "RP": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "obs_conf_limits": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "type": "object",
+                "required": [
+                    "temp_name",
+                    "variable",
+                    "duration",
+                    "AEP",
+                    "Upper",
+                    "Lower",
+                    "z"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "temp_name": {
+                        "type": "string"
+                    },
+                    "variable": {
+                        "type": "string"
+                    },
+                    "duration": {
+                        "type": "integer"
+                    },
+                    "AEP": {
+                        "type": "number"
+                    },
+                    "Graphical": {
+                        "type": "string"
+                    },
+                    "Upper": {
+                        "type": "number"
+                    },
+                    "Lower": {
+                        "type": "number"
+                    },
+                    "z": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    }
+}

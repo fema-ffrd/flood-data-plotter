@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Development files
+.Rhistory
+.RData
+.Rproj*
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Example and test files
+examples/
+tests/
+
+# renv files that aren't needed in container
+server/renv/
+!server/renv.lock
+
+# Data files (these should be mounted as volumes)
+data/
+*.rds
+*.parquet
+
+# Node modules (if any)
+node_modules/
