@@ -1,231 +1,116 @@
 #!/usr/bin/env Rscript
 
-# R Client Script for Flood Data Plotter API
-# Equivalent to client.py with similar functionality
+# Single File R Client for Flood Data Plotter API
+# Takes a JSON file path and generates HTML + PNG output
 
-# Load required packages
-library(httr2)
-library(jsonlite)
-library(fs)
+# Source common utilities
+source(file.path(dirname(sys.frame(1)$ofile), "client_utils.R"))
 
-# Load webshot2 conditionally for PNG generation
-webshot2_available <- requireNamespace("webshot2", quietly = TRUE)
-
-# Configuration constants
-LOCAL_HOST <- "127.0.0.1"
-LOCAL_PORT <- 8081
-
-DOCKER_HOST <- "localhost" 
-DOCKER_PORT <- 8080
-
-STATUS_ENDPOINT <- "/health/status"
-
-
-# --USER INPUTS ---
-EXAMPLE_FILE_PATH <- file.path(gsub("examples", "server", WKDIR), "src", "example-jsons", "flow-example.json")
-EXAMPLE_OUTPUT_PATH <- file.path(WKDIR, "test-output", "Flow_AMS_Green_200th_01Hour")
-ENDPOINT <- "/realization/flows"
-HTML_AND_PNG <- TRUE
-
-# Get working directory and file paths
-WKDIR <- tryCatch({
-  dirname(rstudioapi::getActiveDocumentContext()$path)
-}, error = function(e) {
-  # Fallback: use script location or current working directory
-  if (length(commandArgs(trailingOnly = FALSE)) > 0) {
-    script_path <- commandArgs(trailingOnly = FALSE)[grep("--file=", commandArgs(trailingOnly = FALSE))]
-    if (length(script_path) > 0) {
-      return(dirname(sub("--file=", "", script_path)))
+#' Process a single JSON file
+#' @param json_file_path Path to input JSON file
+#' @param output_dir Output directory (optional, defaults to test-output)
+process_single_file <- function(json_file_path, output_dir = NULL) {
+  
+  wkdir <- get_working_directory()
+  
+  # Set default output directory
+  if (is.null(output_dir)) {
+    output_dir <- fs::path(wkdir, "test-output")
+  }
+  
+  cat("Single File Flood Data Plotter Client\n")
+  cat("Input file:", json_file_path, "\n")
+  cat("Output dir:", output_dir, "\n\n")
+  
+  # Find API server
+  api_url <- find_api_server()
+  
+  # Load JSON data
+  json_data <- load_json_data(json_file_path)
+  
+  # Generate output base path
+  output_base <- generate_output_base(json_file_path, output_dir)
+  
+  # Make API request
+  result <- make_api_request(json_data, api_url, output_base)
+  
+  # Report results
+  if (result$success) {
+    cat("✅ Success! Files created:\n")
+    cat("   HTML:", result$html_path, "\n")
+    if (!is.na(result$png_path)) {
+      cat("   PNG: ", result$png_path, "\n")
     }
-  }
-  getwd()
-})
-
-if (is.na(WKDIR) || WKDIR == "") {
-  WKDIR <- getwd()
-}
-
-
-
-save_html_to_png <- function(html_path, png_path, selector = NULL, 
-                            width = 1280, height = 800, zoom = 2, delay = 0.5) {
-  
-  if (!webshot2_available) {
-    stop("PNG output requested but webshot2 is not installed. ",
-         "Run: install.packages('webshot2')")
-  }
-  
-  html_file <- fs::path_abs(html_path)
-  png_file <- fs::path(png_path)
-  
-  # Create output directory if needed
-  if (!fs::dir_exists(fs::path_dir(png_file))) {
-    fs::dir_create(fs::path_dir(png_file), recurse = TRUE)
-  }
-  
-  # Convert to file:// URL
-  file_url <- paste0("file://", html_file)
-  
-  tryCatch({
-    if (!is.null(selector)) {
-      # Screenshot specific element
-      webshot2::webshot(
-        url = file_url,
-        file = as.character(png_file),
-        selector = selector,
-        vwidth = width,
-        vheight = height, 
-        zoom = zoom,
-        delay = delay
-      )
-    } else {
-      # Full page screenshot
-      webshot2::webshot(
-        url = file_url,
-        file = as.character(png_file),
-        vwidth = width,
-        vheight = height,
-        zoom = zoom,
-        delay = delay
-      )
-    }
-    
-    return(png_file)
-    
-  }, error = function(e) {
-    stop("PNG export failed: ", e$message)
-  })
-}
-
-
-make_plot_request <- function(json_data, url, output_html_path, 
-                             output_png_path = NULL, png_selector = NULL, 
-                             timeout_sec = 60) {
-  
-  cat("Making request to:", url, "\n")
-  
-  # Create request
-  req <- request(url) |>
-    req_method("POST") |>
-    req_headers("Content-Type" = "application/json") |>
-    req_body_json(json_data) |>
-    req_timeout(timeout_sec)
-  
-  # Send request
-  tryCatch({
-    resp <- req_perform(req)
-  }, error = function(e) {
-    stop("HTTP request failed: ", e$message)
-  })
-  
-  # Get response content
-  content <- resp_body_string(resp)
-  
-  # Create output directory if needed
-  out_path <- fs::path(output_html_path)
-  if (!fs::dir_exists(fs::path_dir(out_path))) {
-    fs::dir_create(fs::path_dir(out_path), recurse = TRUE)
-  }
-  
-  # Save HTML/JSON content (even on error for debugging)
-  writeLines(content, out_path, useBytes = TRUE)
-  
-  # Check response status
-  if (resp_status(resp) != 200) {
-    cat("Failed: Server returned HTTP", resp_status(resp), "\n")
-    cat(substr(content, 1, 2000), "\n")
-  }
-  
-  png_path <- NULL
-  # Only attempt PNG if path provided and response was OK
-  if (!is.null(output_png_path) && resp_status(resp) == 200) {
-    tryCatch({
-      png_path <- save_html_to_png(
-        html_path = out_path,
-        png_path = output_png_path,
-        selector = png_selector,
-        width = 1280,
-        height = 800,
-        zoom = 2,
-        delay = 0.5
-      )
-      cat("PNG saved to:", fs::path_abs(png_path), "\n")
-    }, error = function(e) {
-      cat("PNG export failed:", e$message, "\n")
-    })
-  }
-  
-  cat("Request successful. File saved to:", fs::path_abs(out_path), "\n")
-  
-  return(list(
-    response = resp,
-    content = content,
-    png_path = png_path
-  ))
-}
-
-
-check_server <- function(base_url) {
-  tryCatch({
-    health_url <- paste0(base_url, STATUS_ENDPOINT)
-    resp <- request(health_url) |>
-      req_timeout(2) |>
-      req_perform()
-    return(resp_status(resp) == 200)
-  }, error = function(e) {
-    return(FALSE)
-  })
-}
-
-
-# --------- MAIN SCRIPT  ---------
-
-cat("Working directory:", WKDIR, "\n")
-
-LOCAL_URL <- paste0("http://", LOCAL_HOST, ":", LOCAL_PORT, "/api")
-DOCKER_URL <- paste0("http://", DOCKER_HOST, ":", DOCKER_PORT, "/api")
-
-# Try to connect to local development server first, then Docker
-api_url <- NULL
-
-if (check_server(LOCAL_URL)) {
-  api_url <- paste0(LOCAL_URL, ENDPOINT)
-  cat("✅ Connected to local development server at", LOCAL_URL, "\n")
-} else if (check_server(DOCKER_URL)) {
-  api_url <- paste0(DOCKER_URL, ENDPOINT)
-  cat("✅ Connected to Docker server at", DOCKER_URL, "\n")
-} else {
-  stop("Could not connect to server at:\n",
-       "  - Local development: ", LOCAL_URL, "\n",
-       "  - Docker container: ", DOCKER_URL, "\n")
-}
-
-# Load JSON payload
-if (!fs::file_exists(EXAMPLE_FILE_PATH)) {
-  stop("Example JSON file not found at: ", EXAMPLE_FILE_PATH)
-}
-
-json_data <- jsonlite::fromJSON(EXAMPLE_FILE_PATH, simplifyVector = FALSE)
-
-# Make request based on JSON output preference
-if (isTRUE(json_data$json)) {
-  cat("Requesting JSON output from server...\n")
-  output_json_path <- paste0(EXAMPLE_OUTPUT_PATH, ".json")
-  make_plot_request(json_data, api_url, output_json_path)
-} else {
-  cat("Requesting HTML output from server...\n")
-  output_html_path <- paste0(EXAMPLE_OUTPUT_PATH, ".html")
-  
-  if (HTML_AND_PNG && webshot2_available) {
-    output_png_path <- paste0(EXAMPLE_OUTPUT_PATH, ".png")
-    make_plot_request(json_data, api_url, output_html_path, 
-                     output_png_path = output_png_path)
+    cat("   Duration:", round(result$duration, 2), "seconds\n")
   } else {
-    if (HTML_AND_PNG && !webshot2_available) {
-      cat("Note: webshot2 not available, skipping PNG generation\n")
-    }
-    make_plot_request(json_data, api_url, output_html_path)
+    cat("❌ Failed:", result$error, "\n")
+    stop("Request failed")
   }
+  
+  return(result)
 }
 
-cat("Script completed successfully!\n")
+# Interactive helper function
+run_example <- function() {
+  wkdir <- get_working_directory()
+  json_file <- file.path(gsub("examples", "server", wkdir), "src", "example-jsons", "flow-example.json")
+  
+  if (!fs::file_exists(json_file)) {
+    cat("❌ Example file not found:", json_file, "\n")
+    return(FALSE)
+  }
+  
+  cat("Running example with:", json_file, "\n")
+  process_single_file(json_file)
+}
+
+# Interactive helper function for parallel processing
+run_parallel_example <- function() {
+  wkdir <- get_working_directory()
+  json_dir <- file.path(gsub("examples", "server", wkdir), "src", "example-jsons")
+  
+  if (!fs::dir_exists(json_dir)) {
+    cat("❌ Example JSON directory not found:", json_dir, "\n")
+    return(FALSE)
+  }
+  
+  cat("Running parallel example with directory:", json_dir, "\n")
+  
+  # Source and run the parallel client
+  source(file.path(wkdir, "client_parallel.R"))
+  results <- process_directory_parallel(json_dir)
+  
+  return(results)
+}
+
+# Main execution when run as script
+if (!interactive()) {
+  args <- commandArgs(trailingOnly = TRUE)
+  
+  if (length(args) == 0) {
+    # Default: use example file
+    wkdir <- get_working_directory()
+    json_file <- file.path(gsub("examples", "server", wkdir), "src", "example-jsons", "flow-example.json")
+    
+    if (!fs::file_exists(json_file)) {
+      cat("❌ Default example file not found:", json_file, "\n")
+      cat("Usage: Rscript client.R [json_file_path] [output_dir]\n")
+      quit(status = 1)
+    }
+    
+    cat("Using default example file:", json_file, "\n")
+    process_single_file(json_file)
+    
+  } else if (length(args) == 1) {
+    # JSON file path provided
+    process_single_file(args[1])
+    
+  } else if (length(args) == 2) {
+    # JSON file and output directory provided
+    process_single_file(args[1], args[2])
+    
+  } else {
+    cat("Usage: Rscript client.R [json_file_path] [output_dir]\n")
+    quit(status = 1)
+  }
+}

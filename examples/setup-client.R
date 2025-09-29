@@ -1,50 +1,81 @@
 #!/usr/bin/env Rscript
 
-# Setup script for R client dependencies
-# Run this script to install required packages for client.R
+# Setup script for parallel R client dependencies
+# Run this script to install required packages for parallel-client.R
 
-cat("Installing required R packages for flood-data-plotter client...\n")
+cat("Installing packages for parallel flood-data-plotter client...\n\n")
 
-# Required packages
+# Required packages for parallel processing
 required_packages <- c(
   "httr2",      # Modern HTTP client
   "jsonlite",   # JSON handling
-  "fs"          # File system operations
+  "fs",         # File system operations
+  "future",     # Asynchronous parallel processing
+  "furrr",      # Future-based apply functions
+  "purrr",      # Functional programming tools
+  "tibble"      # Modern data frames
 )
 
-# Optional packages for PNG generation
+# Optional packages
 optional_packages <- c(
   "webshot2",   # HTML to PNG conversion
   "rstudioapi"  # For RStudio integration
 )
 
 # Install required packages
-cat("Installing required packages:", paste(required_packages, collapse = ", "), "\n")
-install.packages(required_packages, repos = "https://cran.r-project.org")
+cat("Installing required packages...\n")
+for (pkg in required_packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    cat("Installing:", pkg, "\n")
+    install.packages(pkg, repos = "https://cran.r-project.org")
+  } else {
+    cat("✅ Already installed:", pkg, "\n")
+  }
+}
 
 # Install optional packages with error handling
+cat("\nInstalling optional packages...\n")
 for (pkg in optional_packages) {
   tryCatch({
     if (!requireNamespace(pkg, quietly = TRUE)) {
-      cat("Installing optional package:", pkg, "\n")
+      cat("📥 Installing:", pkg, "\n")
       install.packages(pkg, repos = "https://cran.r-project.org")
     } else {
-      cat("Package", pkg, "already installed\n")
+      cat("✅ Already installed:", pkg, "\n")
     }
   }, error = function(e) {
-    cat("Warning: Failed to install optional package", pkg, ":", e$message, "\n")
+    cat("⚠️  Failed to install", pkg, ":", e$message, "\n")
   })
 }
 
-# Special note for webshot2
-if (requireNamespace("webshot2", quietly = TRUE)) {
-  cat("\n✅ webshot2 installed successfully!\n")
-  cat("PNG generation will be available in client.R\n")
-} else {
-  cat("\n⚠️  webshot2 installation failed or not available\n") 
-  cat("PNG generation will be skipped in client.R\n")
-  cat("You can try installing manually with: install.packages('webshot2')\n")
-}
+# Test parallel processing setup
+cat("\n🧪 Testing parallel processing setup...\n")
+tryCatch({
+  library(future)
+  library(furrr)
+  
+  # Test basic parallel functionality
+  plan(multisession, workers = 2)
+  test_result <- future_map(1:3, ~ Sys.getpid())
+  plan(sequential)
+  
+  unique_pids <- length(unique(unlist(test_result)))
+  cat("✅ Parallel processing test successful!\n")
+  cat("   - Used", unique_pids, "different processes\n")
+  
+}, error = function(e) {
+  cat("❌ Parallel processing test failed:", e$message, "\n")
+})
 
-cat("\n🎉 Setup complete! You can now run client.R\n")
-cat("Usage: Rscript examples/client.R\n")
+# Performance recommendations
+cat("\nPERFORMANCE RECOMMENDATIONS:\n")
+cat(paste(rep("=", 50), collapse = ""), "\n")
+cat("• Default workers: 3 (adjust MAX_WORKERS in parallel-client.R)\n")
+cat("• For CPU-intensive tasks: workers = parallel::detectCores() - 1\n")
+cat("• For I/O-intensive tasks: workers = 4-8\n")
+cat("• PNG generation disabled by default (resource intensive)\n")
+cat("• Monitor memory usage with many concurrent requests\n")
+
+cat("\n Setup complete! You can now run:\n")
+cat("   Rscript examples/parallel-client.R\n")
+cat("\n For custom usage, see the main() function in parallel-client.R\n")
