@@ -29,7 +29,10 @@ api_info <- make_api_info(
 
 # ---- Working dir / script path ----
 script_path <- get_script_path()
-setwd(normalizePath(file.path(script_path, "server"), mustWork = FALSE))
+
+if (basename(getwd()) != "server" && dir.exists(file.path(script_path, "server"))) {
+  setwd(normalizePath(file.path(script_path, "server"), mustWork = FALSE))
+}
 
 # ---- Log cleanup ----
 cleanup_old_logs <- function(log_dir = "logs", days_to_keep = 30) {
