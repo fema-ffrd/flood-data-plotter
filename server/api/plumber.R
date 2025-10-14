@@ -54,7 +54,7 @@ cleanup_old_logs <- function(log_dir = "logs", days_to_keep = 30) {
 cleanup_old_logs()
 
 # ---- Schemas ----
-SCHEMAS_DIR <- normalizePath(file.path(script_path, "server", "api", "schemas"), mustWork = FALSE)
+SCHEMAS_DIR <- normalizePath(file.path(script_path, "api", "schemas"), mustWork = TRUE)
 SCHEMA_VALIDATORS <- new.env(parent = emptyenv())
 load_schema_validators(SCHEMAS_DIR, SCHEMA_VALIDATORS)
 
