@@ -33,9 +33,7 @@ WORKDIR /app
 COPY server/renv.lock renv.lock
 
 # Install renv and restore packages
-RUN R -e "install.packages('renv', repos = 'https://cloud.r-project.org')"
-RUN R -e "renv::consent(provided = TRUE)"
-RUN R -e "renv::restore()"
+RUN R -e "install.packages('renv', repos = 'https://cloud.r-project.org'); library(renv); renv::consent(provided = TRUE); renv::restore()"
 
 # Ensure rapidoc and listviewer are installed (sometimes missing from renv restore)
 RUN R -e "if (!require('rapidoc', quietly = TRUE)) install.packages('rapidoc', repos = 'https://cloud.r-project.org')"
