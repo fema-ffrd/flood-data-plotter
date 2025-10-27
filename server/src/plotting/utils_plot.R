@@ -76,6 +76,57 @@ get_realization_df <- function(flows, real) {
   df
 }
 
+
+get_realization_df_sd <- function(inputs, real) {
+  df <- NULL
+  
+  if (is.data.frame(inputs) && !"stage_discharge" %in% names(inputs)) {
+    df <- tryCatch(dplyr::filter(inputs, Realization == real), error = function(e) NULL)
+    
+  } else if (is.data.frame(inputs) && "stage_discharge" %in% names(inputs)) {
+    row <- tryCatch(inputs[which(as.character(inputs$realization) == as.character(real))[1], , drop = FALSE],
+                    error = function(e) NULL)
+    if (!is.null(row) && nrow(row) == 1 && length(row$stage_discharge[[1]]) > 0) {
+      df <- do.call(rbind, lapply(row$stage_discharge[[1]], function(flow) as.data.frame(flow, stringsAsFactors = FALSE)))
+      # add Realization/Block/Event if missing
+      if (!"Realization" %in% names(df)) df$Realization <- real
+    }
+    
+  } else if (is.list(inputs)) {
+    for (entry in inputs) {
+      if (is.list(entry) && !is.null(entry$realization) && identical(as.character(entry$realization), as.character(real))) {
+        df <- do.call(rbind, lapply(entry$stage_discharge, function(flow) as.data.frame(flow, stringsAsFactors = FALSE)))
+        if (!"Realization" %in% names(df)) df$Realization <- real
+        break
+      }
+    }
+  }
+
+  
+  if (!is.data.frame(df)) return(NULL)
+  
+  # Ensure df is a proper data.frame (not a list-column or weird vector) and reset rownames
+  df <- as.data.frame(df, stringsAsFactors = FALSE)
+  rownames(df) <- NULL
+  
+  # # If Z exists, order by Z descending so rows follow desired plotting order (1,3,2 in your example)
+  # if ("Z" %in% names(df)) {
+  #   znum <- suppressWarnings(as.numeric(df$Z))
+  #   # preserve NA handling, order decreasing (highest Z first)
+  #   df <- df[order(znum, decreasing = TRUE, na.last = TRUE), , drop = FALSE]
+  #   rownames(df) <- NULL
+  # }
+  
+  if (exists("filter_trace_data", mode = "function")) {
+    df2 <- tryCatch(df %>% filter_trace_data(threshold = 2), error = function(e) df)
+    if (is.data.frame(df2)) return(df2)
+  }
+  
+  df
+}
+
+
+
 get_obs_df <- function(obs_flows) {
   if (!is.list(obs_flows)) {
     stop("Input must be a list of lists")

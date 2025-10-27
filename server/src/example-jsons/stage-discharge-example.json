@@ -1,0 +1,138 @@
+{
+    "shortname": "Green_200th",
+    "usgs_id": "12113344",
+    "gage_zero": 0.00,
+    "gage_datum": "NAVD88",
+    "vert_conversion": 0.000,
+    "Historic": null,
+    "ShiftDate": "2021-05-11",
+    "scenario_name": "duwamish_rating",
+    "site_name_for_plot": "GREEN RIVER AT 200TH STREET AT KENT, WA",
+    "json": false,
+    "ffrd_ras_event_peaks_element": "200thStreet_line|Perimeter 1", 
+    "ffrd_ras_event_peaks": [
+        {
+            "realization": 1,
+            "stage_discharge": [
+                {
+                    "Block": 1,
+                    "Event": 1,
+                    "Discharge": 6746.84228,
+                    "Stage": 28.676609
+                },
+                {
+                    "Block": 2,
+                    "Event": 12,
+                    "Discharge": 10100.6641,
+                    "Stage": 34.27757
+                },
+                {
+                    "Block": 3,
+                    "Event": 21,
+                    "Discharge": 4700.9541,
+                    "Stage": 24.91081
+                }
+            ]
+        },
+        {
+            "realization": 2,
+            "stage_discharge": [
+                {
+                    "Block": 19,
+                    "Event": 187,
+                    "Discharge": 2291.0012,
+                    "Stage": 19.42983
+                },
+                {
+                    "Block": 20,
+                    "Event": 210,
+                    "Discharge": 10590.1504,
+                    "Stage": 35.06480
+                },
+                {
+                    "Block": 22,
+                    "Event": 226,
+                    "Discharge": 5530.6191,
+                    "Stage": 26.37575
+                }
+            ]
+        }
+    ],
+    "usgs_rating": [
+        {
+            "Discharge": 160,
+            "Stage": 10.0
+        },
+        {
+            "Discharge": 1740,
+            "Stage": 16.0
+        },
+        {
+            "Discharge": 11800,
+            "Stage": 36.0
+        }
+    ],
+    "usgs_measurements": [
+        {
+            "Date": "23 Feb 2012, 24:00",
+            "Discharge": 8510,
+            "Stage": 30.82
+        },
+        {
+            "Date": "11 Apr 2013, 24:00",
+            "Discharge": 3350,
+            "Stage": 20.35
+        },
+        {
+            "Date": "16 Dec 2016, 24:00", 
+            "Discharge": 4310,
+            "Stage": 23.29
+        }
+    ],
+    "usgs_annual_peaks": [
+        {
+            "Date": "06 Feb 2018, 11:15",
+            "Discharge": 8080,
+            "Stage": 31.16
+        },
+        {
+            "Date": "09 Feb 2020, 17:00",
+            "Discharge": 9720,
+            "Stage": 33.23
+        },
+        {
+            "Date": "08 Dec 2023, 24:00", 
+            "Discharge": 6300,
+            "Stage": 27.99
+        }
+    ],
+    "calibration_event_results": [
+        {
+            "Date": "15 Dec, 11:15",
+            "Discharge": 9837,
+            "Stage": 31.9
+        },
+        {
+            "Date": "20 Feb, 17:00",
+            "Discharge": 9671,
+            "Stage": 31.6
+        }
+    ],
+    "ras_single_event": [
+        {
+            "ref_line_name": "200thStreet_line|Perimeter",
+            "Discharge": 976,
+            "Stage": 15.0
+        },
+        {
+            "ref_line_name": "200thStreet_line|Perimeter",
+            "Discharge": 2233,
+            "Stage": 19.4
+        },
+        {
+            "ref_line_name": "200thStreet_line|Perimeter",
+            "Discharge": 1228,
+            "Stage": 16.1
+        }
+    ]
+}

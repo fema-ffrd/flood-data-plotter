@@ -1,0 +1,193 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "realization_stage_discharge",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "shortname",
+    "usgs_id",
+    "gage_zero",
+    "gage_datum",
+    "vert_conversion",
+    "Historic",
+    "ShiftDate",
+    "scenario_name",
+    "site_name_for_plot",
+    "json",
+    "ffrd_ras_event_peaks_element",
+    "ffrd_ras_event_peaks"
+  ],
+  "properties": {
+    "shortname": { "type": "string" },
+    "usgs_id": { "type": "string" },
+    "gage_zero": { "type": "number" },
+    "gage_datum": { "type": "string" },
+    "vert_conversion": { "type": "number" },
+    "Historic": { "type": "number" },
+    "ShiftDate": { "type": "string" },
+    "scenario_name": { "type": "string" },
+    "site_name_for_plot": { "type": "string" },
+    "json": { "type": "boolean" },
+    "ffrd_ras_event_peaks_element": { "type": "string" },
+    "ffrd_ras_event_peaks": {
+        "type": "array",
+        "maxItems": 3,
+        "items": {
+            "type": "object",
+            "required": [
+                "realization",
+                "stage"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "realization": {
+                    "type": "integer"
+                },
+                "stage": {
+                    "type": "array",
+                    "maxItems": 3,
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "Block",
+                            "Event",
+                            "Discharge",
+                            "Stage"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "Block": {
+                                "type": "integer"
+                            },
+                            "Event": {
+                                "type": "integer"
+                            },
+                            "Discharge": {
+                                "type": "number"
+                            },
+                            "Stage": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "usgs_rating": {
+        "type": "array",
+        "maxItems": 3,
+        "items": {
+            "type": "object",
+            "required": [
+                "Discharge",
+                "Stage"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "Discharge": {
+                    "type": "number"
+                },
+                "Stage": {
+                    "type": "number"
+                }
+            }
+        }
+    },
+    "usgs_measurements": {
+        "type": "array",
+        "maxItems": 3,
+        "items": {
+            "type": "object",
+            "required": [
+                "Date",
+                "Discharge",
+                "Stage"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "Date": {
+                    "type": "string"
+                },
+                "Discharge": {
+                    "type": "number"
+                },
+                "Stage": {
+                    "type": "number"
+                }
+            }
+        }
+    },
+    "usgs_annual_peaks": {
+        "type": "array",
+        "maxItems": 3,
+        "items": {
+            "type": "object",
+            "required": [
+                "Date",
+                "Discharge",
+                "Stage"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "Date": {
+                    "type": "string"
+                },
+                "Discharge": {
+                    "type": "number"
+                },
+                "Stage": {
+                    "type": "number"
+                }
+            }
+        }
+    },
+    "calibration_event_results": {
+        "type": "array",
+        "maxItems": 3,
+        "items": {
+            "type": "object",
+            "required": [
+                "Date",
+                "Discharge",
+                "Stage"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "Date": {
+                    "type": "string"
+                },
+                "Discharge": {
+                    "type": "number"
+                },
+                "Stage": {
+                    "type": "number"
+                }
+            }
+        }
+    },
+    "ras_single_event": {
+        "type": "array",
+        "maxItems": 3,
+        "items": {
+            "type": "object",
+            "required": [
+                "ref_line_name",
+                "Discharge",
+                "Stage"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "ref_line_name": {
+                    "type": "string"
+                },
+                "Discharge": {
+                    "type": "number"
+                },
+                "Stage": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}
